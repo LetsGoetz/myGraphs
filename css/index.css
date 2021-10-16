@@ -1,0 +1,70 @@
+:root {
+    --standard-input-height: 1.8em;
+    --standard-input-padding: 2px 8px;
+}
+
+body {
+    font-size: 1.2em;
+    background-color: #f8f8f8;
+}
+
+#input {
+    resize: none;
+    width: 100%;
+    padding: var(--standard-input-padding);
+    border-left: 4px solid #000000;
+    border-bottom: 2px solid #000000;
+    border-top: 1px solid #c2c2c2;
+    border-right: 1px solid #c2c2c2;
+}
+
+#input:focus {
+    border-top: 1px solid #000000;
+    border-right: 1px solid #000000;
+    outline: none;
+}
+
+.flexRow {
+    display: flex;
+    align-items: center;
+}
+
+.section {
+    margin: 1em 0;
+}
+
+.btn {
+    background-color: #fff;
+    padding: 6px 8px;
+    border: 2px solid #000000;
+    transition: all 0.15s;
+}
+
+.btn:hover {
+    background-color: #6e6e6e;
+    color: #fff;
+    cursor: pointer;
+}
+
+#btnSearch {
+    margin-left: 5px;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.blink {
+    animation: blinker 1s linear 3;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+#resultsDisplay {
+    display: none;
+}

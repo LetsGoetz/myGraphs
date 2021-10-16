@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+
+<body>
+    <div>
+        <h2>Bipartition analysis of a given Graph</h2>
+
+        <div>
+            <b>Assertions:</b><br />
+            <ol>
+                <li>
+                    Since no directions are pointed out in the task description, the graph is assumed to be undirected per default.
+                </li>
+                <li>
+                    Summarzed in short, a graph is bipartite if its every edge connects 2 vertices of different colors. Following this logic, a graph must not be connected to be bipartite.
+                </li>
+                <li>
+                    If a graph is disconnected, it can only be bipartite if all its disjoint sets are bipartite.
+                </li>
+            </ol>
+
+        </div>
+
+        <label for='input'>Provide your data</label>
+        <div class="flexRow section">
+
+            <textarea rows=6 name="input" id="input"></textarea>
+        </div>
+
+        <div class="section">
+            <button class="btn btn-block" id="btnAction" onclick="onClickAction()">
+                Check
+            </button>
+        </div>
+
+
+    </div>
+
+    <script src="./src/index.js"></script>
+</body>
+
+</html>

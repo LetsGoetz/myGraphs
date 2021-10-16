@@ -1,0 +1,11 @@
+{
+  "name": "mygraphs",
+  "version": "1.0.0",
+  "description": "a small application to play with graphs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Goetz",
+  "license": "MIT"
+}
