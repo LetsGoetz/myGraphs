@@ -24,7 +24,7 @@ class GraphNode {
     }
 }
 
-export class Graph {
+export default class Graph {
 
     constructor(edgeDirection = Graph.UNDIRECTED) {
         this.vertices = {};
@@ -41,7 +41,7 @@ export class Graph {
     addVertex(node) {
         // add vertex only if it does not exist, return the vertex anyways
         if (!this.vertices[node]) {
-            this.vertices[node] = new GraphNode(val, this);
+            this.vertices[node] = new GraphNode(node, this);
         }
 
         return this.vertices[node];
@@ -86,10 +86,10 @@ export class Graph {
 
         if (this.vertices[source] && this.vertices[destination]) {
 
-            this._addEdgetUtil(source, destination);
+            this.#_addEdgetUtil(source, destination);
 
             if (this.edgeDirection === Graph.UNDIRECTED) {
-                this._addEdgetUtil(destination, source);
+                this.#_addEdgetUtil(destination, source);
             }
 
         } else {
@@ -109,8 +109,8 @@ export class Graph {
             this.vertices[source].edges[destination].weight += 1;
 
         } else {
-            // edge does not exist, set weight to 1
-            this.vertices[source].edges[end] = { weight: 1 };
+            // edge does not exist, set weight to 1 and the destination target
+            this.vertices[source].edges[destination] = { weight: 1, target: this.vertices[destination] };
         }
     }
 
@@ -122,11 +122,11 @@ export class Graph {
         /*
         just remove the edge if nodes exist
         */
-        this._removeEdgeUtil(source, destination);
+        this.#_removeEdgeUtil(source, destination);
 
         if (this.edgeDirection === Graph.UNDIRECTED) {
             // wenn graph is undirected - remove the edge in the opposite direction
-            this._removeEdgeUtil(destination, source);
+            this.#_removeEdgeUtil(destination, source);
         }
     }
     #_removeEdgeUtil(source, destination) {
@@ -143,65 +143,71 @@ export class Graph {
     }
 
 
-    inspectGraph(algorithm = Graph.prototype.traverseGraph.BFS) {
+    inspectGraph(algorithm = Graph.prototype.inspectGraph.BFS) {
         /*
          traverse the whole graph (which may be disconnected), and while doing it, set isDisconnected and isBipartite properties
          
          iterate over object properties, start the tree search at the first node, once complete, iterate further and check if current node is visited (O(1)).
          run the algorithm from any unvisited node 
 
-         So we iterate once over every vertex and every edge (during tree traversal), which is about O(V+E) + hash operations, and in order do deal with disconnected graphs, we have to compare every vertex to the visisted set,
-         which also v iterations + hash table reads
-
-         The advantage of this solution is that it is lazy. We iterate over the object in place, creating and feeding helper structures progressivlely as we advance, and we can stop at any time if our objetive is achieved.
-         Makes it tempting to implement chunking, but it is out of the scope of this assignment
          */
 
         // pass the visited set by reference, so we do not have to iterate over the values twice in order to get a top-level visited set
         let visited = new Set();
 
-        // key: vertex, value: 1|-1 , where 1 is red and -1 is blue 
+        // key = vertex, value = 1|-1 , where 1 is "red" and -1 is "blue" 
         let coloration = new Map();
 
         let bFirstIteration = true;
 
         let generator; // generator we'll use depends on the desired algorithm
 
-        if (algorithm === Graph.prototype.traverseGraph.DFS) {
-            generator = Graph.dfsGenerator;
-        } else if (algorithm === Graph.prototype.traverseGraph.BFS) {
-            generator = Graph.bfsGenerator;
+        if (algorithm === Graph.prototype.inspectGraph.DFS) {
+            generator = this.dfsGenerator;
+        } else if (algorithm === Graph.prototype.inspectGraph.BFS) {
+            generator = this.bfsGenerator;
         } else {
             throw "Unknown search algorithm. Please store your search algorithm name as a symbolc value in constructor props and integrate it here."
         }
 
-        for (let graphNode in this.vertices) {
+        for (let graphNodeName in this.vertices) {
+
+            let graphNode = this.vertices[graphNodeName];
 
             // skip visited certices
             if (visited.has(graphNode)) continue;
 
-            // for/of will trigger our generator which will fill the visited Set and coloration Map while iterating. Next() yields unvisited nodes.
-            // omit coloration if not needed
+            // trigger our generator which will fill the visited Set and coloration Map while iterating. Next() yields unvisited graphNodes.
+            // omit coloration if not needed. 
+            // if coloration is not omitted, and graph coloration is not bipartite, the return value of generator will be { isBipartite: false }
             for (let vertex of generator(graphNode, visited, coloration)) {
 
-                // do something with it here if you like
-            }
+                // do something with the graphNode object here if you like
 
+                if (vertex.isBipartite === false) {
+                    this.isBipartite = false;
+                    return;
+                }
+            }
 
             // if we are here, and it is not the first iteration, it means we have disjoint subsets in our graph
-            if (bFirstIteration) {
+            if (bFirstIteration === true) {
                 bFirstIteration = false;
             } else {
+
+                console.log("second interation")
                 this.isConnected = false;
+                this.isBipartite = false;
+                return;
             }
         }
-    }
 
+    }
 
     *bfsGenerator(first, visited, coloration=null) {
         /*
-         * first is a vertex, visited is a Set, coloration is a Map Obj
-         yield the next node,  upon next() mark it as visited, engueue adjacents
+         * first is a graphNode object, visited is a Set, coloration is a Map Obj
+         yield the next graphNode,  upon next() mark it as visited, engueue adjacents
          */
 
         let nodesToVisit = new Queue();
@@ -209,74 +215,86 @@ export class Graph {
         nodesToVisit.enqueue(first);
 
         // if we need to check the coloration: set first node to red
-        if (coloration) coloration.set(first, 1);
+        if (coloration) coloration.set(first.value, 1);
 
         while (!nodesToVisit.isEmpty()) {
 
-            let node = nodesToVisit.dequeue();
+            let queueNode = nodesToVisit.dequeue();
 
-            if (!visited.has(node)) {
-                
-                for (let adjacent in node.edges) {
+            let graphNode = queueNode.value; 
+
+            if (!visited.has(graphNode)) {
+
+                for (let adjacentName in graphNode.edges) {
 
                     if (coloration) {
                         //color all adjacents
-                        this._processEdgeBipartition(node, adjacent, coloration);
+                        //this.#_processEdgeBipartition(node, adjacent, coloration);
+
+                        if (!coloration.has(adjacentName)) {
+                            // set the opposite color if it is not set
+                            coloration.set(adjacentName, (coloration.get(graphNode.value) * -1));
+                        } else {
+                            //if the color of adjacent is set - check for bipartition
+                            if (coloration.get(graphNode.value) + coloration.get(adjacentName) !== 0) {
+                                // graph is not biaprtite
+                                yield { isBipartite: false }
+
+                            }
+                        }
                     }
 
-                    nodesToVisit.enqueue(adjacent);
+                    nodesToVisit.enqueue(graphNode.edges[adjacentName].target);
                 }
 
-                yield node;
-                visited.add(node);
+                yield graphNode;
+                visited.add(graphNode);
             }
         }
     }
 
     *dfsGenerator(first, visited, coloration = null) {
         /*
-         * first is a vertex, visited is a Set, coloration is a Map Obj
-          yield the next node, upon next() mark it as visited, push adjacents to the stack
+         * first is a graphNode object, visited is a Set, coloration is a Map Obj
+          yield the next graphNode, upon next() mark it as visited, push adjacents to the stack
          */
-        
+
         let nodesToVisit = []; //this is our stack
 
         nodesToVisit.push(first);
 
         // if we need to check the coloration: set first node to red
-        if (coloration) coloration.set(first, 1);
+        if (coloration) coloration.set(first.value, 1);
 
         while (nodesToVisit.length) {
-            let node = nodesToVisit.pop();
+            let graphNode = nodesToVisit.pop();
 
-            if (!visited.has(node)) {
+            if (!visited.has(graphNode)) {
 
-                for (let adjacent in node.edges) {
+                for (let adjacentName in graphNode.edges) {
 
                     if (coloration) {
                         //color all adjacents
-                        this._processEdgeBipartition(node, adjacent, coloration);
+                        //this.#_processEdgeBipartition(node, adjacent, coloration);
+
+                        if (!coloration.has(adjacentName)) {
+                            // set the opposite color if it is not set
+                            coloration.set(adjacentName, (coloration.get(graphNode.value) * -1));
+                        } else {
+                            //if the color of adjacent is set - check for bipartition
+                            if (coloration.get(graphNode.value) + coloration.get(adjacentName) !== 0) {
+                                // graph is not biaprtite
+                                yield { isBipartite: false }
+
+                            }
+                        }
                     }
 
-                    nodesToVisit.push(adjacent);
+                    nodesToVisit.push(graphNode.edges[adjacentName].target);
                 }
 
-                yield node;
-                visited.add(node);
-            }
-        }
-    }
-    #_processEdgeBipartition(source, adjacent, coloration) {
-        // Utility function for generators 
-
-        if (!coloration.has(adjacent)) {
-            // set the opposite color if it is not set
-            coloration.set(adjacent, coloration.get(source) * -1);
-        } else {
-            //if the color of adjacent is set - check for bipartition
-            if (coloration.get(source) + coloration.get(adjacent) !== 0) {
-                // graph is not biaprtite
-                this.isBipartite = false;
+                yield graphNode;
+                visited.add(graphNode);
             }
         }
     }
@@ -286,5 +304,5 @@ export class Graph {
  
 Graph.UNDIRECTED = Symbol('directed graph'); // one-way edges
 Graph.DIRECTED = Symbol('undirected graph'); // two-ways edges
-Graph.prototype.traverseGraph.DFS = Symbol('DFS'); // use DFS for traversal
-Graph.prototype.traverseGraph.DFS = Symbol('BFS'); // use BFS for traversal
+Graph.prototype.inspectGraph.DFS = Symbol('DFS'); // use DFS for traversal
+Graph.prototype.inspectGraph.BFS = Symbol('BFS'); // use BFS for traversal

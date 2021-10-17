@@ -5,7 +5,7 @@ class QueueNode {
     }
 }
 
-export class Queue {
+export default class Queue {
     /*
     implements linked list structure
     */

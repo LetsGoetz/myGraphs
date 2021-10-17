@@ -12,23 +12,7 @@
 
 <body>
     <div>
-        <h2>Bipartition analysis of a given Graph</h2>
-
-        <div>
-            <b>Assertions:</b><br />
-            <ol>
-                <li>
-                    Since no directions are pointed out in the task description, the graph is assumed to be undirected per default.
-                </li>
-                <li>
-                    Summarzed in short, a graph is bipartite if its every edge connects 2 vertices of different colors. Following this logic, a graph must not be connected to be bipartite.
-                </li>
-                <li>
-                    If a graph is disconnected, it can only be bipartite if all its disjoint sets are bipartite.
-                </li>
-            </ol>
-
-        </div>
+        <h2>Bipartition nad connectivity analysis of a given Graph</h2>
 
         <label for='input'>Provide your data</label>
         <div class="flexRow section">
@@ -38,14 +22,17 @@
 
         <div class="section">
             <button class="btn btn-block" id="btnAction" onclick="onClickAction()">
-                Check
+                Inspect
             </button>
         </div>
 
+        <div class="section" id="messageDisplay">
+            
+        </div>
 
     </div>
 
-    <script src="./src/index.js"></script>
+    <script src="./src/main.js"></script>
 </body>
 
 </html>
