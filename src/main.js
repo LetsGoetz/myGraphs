@@ -38,7 +38,7 @@ const processInput = async () => {
 
 function displayInspectionResults() {
     let messageDisplay = document.getElementById("messageDisplay");
-    let message = `The given graph is ${currentGraphInstance.isConnected ? "" : "NOT "}connected and ${currentGraphInstance.isBipartite? "" : "NOT "}biapratite (red-blue colorable)`;
+    let message = `The given graph is ${currentGraphInstance.isBipartite? "" : "NOT "}biapratite (red-blue colorable)`;
 
     messageDisplay.innerHTML = message;
 }
