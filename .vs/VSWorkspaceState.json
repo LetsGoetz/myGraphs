@@ -1,4 +1,9 @@
 {
-  "ExpandedNodes": [],
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\structures"
+  ],
+  "SelectedNode": "\\index.html",
   "PreviewInSolutionExplorer": false
 }

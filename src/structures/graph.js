@@ -38,6 +38,7 @@ export default class Graph {
     isConnected = true; // graph is assumed to be connected until proven otherwise by this.inspectGraph
     isBipartite = true; // graph is assumed to be bipartite until proven otherwise by this.inspectGraph
 
+
     addVertex(node) {
         // add vertex only if it does not exist, return the vertex anyways
         if (!this.vertices[node]) {
@@ -58,14 +59,22 @@ export default class Graph {
 
         if (this.vertices[node]) {
 
-            delete this.vertices[node];
-
-            //time O(V) + reading and deleting the hash
-            for (let vertex in this.vertices) {
-                if (vertex.edges[node]) {
-                    delete vertex.edges[node];
+            if (this.edgeDirection === Graph.DIRECTED) {
+                //iterate over every vertex
+                for (let vertex in this.vertices) {
+                    if (vertex.edges[node]) {
+                        delete vertex.edges[node];
+                    }
+                }
+            } else {
+                //just iterate over edges
+                for (let edge in this.vertices[node].edges) {
+                    
+                    if (this.vertices[edge].edges[node]) delete this.vertices[edge].edges[node];
                 }
             }
+
+            delete this.vertices[node];
 
         } else {
             throw `node ${node} does not exist in this graph`;
@@ -229,7 +238,6 @@ export default class Graph {
 
                     if (coloration) {
                         //color all adjacents
-                        //this.#_processEdgeBipartition(node, adjacent, coloration);
 
                         if (!coloration.has(adjacentName)) {
                             // set the opposite color if it is not set
