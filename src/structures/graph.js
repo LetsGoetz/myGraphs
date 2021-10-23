@@ -199,13 +199,13 @@ export default class Graph {
         // the only implementation difference between DFS and BFS here is the stack/queue
         if (algorithm === Graph.prototype.inspectGraph.DFS) {
             nodesToVisit = []; //this is our stack
+            nodesToVisit.push(first);
         } else if (algorithm === Graph.prototype.inspectGraph.BFS) {
             nodesToVisit = new Queue();
+            nodesToVisit.enqueue(first);
         } else {
             throw "Unknown search algorithm. Please store your search algorithm name as a symbolc value in constructor props and integrate it here."
         }
-
-        nodesToVisit.enqueue(first);
 
         //check the connectivity
         let isConnectedToOtherSubset = iTraversalCount === 1;
