@@ -269,7 +269,7 @@ export default class Graph {
 
         // set the graph properties
         if (graph.isConnected !== false) graph.isConnected = isConnectedToOtherSubset;
-        graph.isBipartite = (graph.isBipartite !== false && graph.isConnected === true);
+        if (coloration) graph.isBipartite = (graph.isBipartite !== false && graph.isConnected === true);
         graph.isCyclic = graph.edgeDirection === Graph.UNDIRECTED || graph.isCyclic === true;
     }
 
