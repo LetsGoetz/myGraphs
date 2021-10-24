@@ -23,7 +23,15 @@ const processInput = async () => {
         currentGraphInstance = new Graph(); // use Graph.DIRECTED as a constructor parameter if graph is directed
 
         for (let edges of inputIterator(rawString)) {
-            edges.forEach(edge => currentGraphInstance.addEdge(...edge));
+            edges.forEach(edge => {
+                if (edge.length === 1) {
+                    currentGraphInstance.addVertex(...edge);
+                } else if (edge.length === 2) {
+                    currentGraphInstance.addEdge(...edge)
+                } else {
+                    throw "Unexpected edge length"
+                }
+            });
         }
     }
 
@@ -38,7 +46,19 @@ const processInput = async () => {
 
 function displayInspectionResults() {
     let messageDisplay = document.getElementById("messageDisplay");
-    let message = `The given graph is ${currentGraphInstance.isBipartite? "" : "NOT "}biapratite (red-blue colorable)`;
+    let message = "The given graph is: <br>";
+
+    if (currentGraphInstance.edgeDirection === currentGraphInstance.constructor.UNDIRECTED) {
+        message += `undirected, `;
+    } else {
+        message += `directed, `;
+    }
+
+    if (currentGraphInstance.isConnected === false) {
+        message += `disconnected, which also means not bipartite (red - blue colorable)`;
+    } else {
+        message += `connected ${ currentGraphInstance.isBipartite ? "and " : "but NOT " }biapratite (red - blue colorable)`;
+    }
 
     messageDisplay.innerHTML = message;
 }
@@ -84,11 +104,16 @@ function inputIterator(sValue) {
 
                     let edges = [];
 
-                    for (i = 0; i + 1 < saConnectedVertices.length; i++) {
+                    if (saConnectedVertices.length == 1) {
+                        // solo vertex
+                        edges.push([saConnectedVertices[0]]);
+                    } else {
+                        for (i = 0; i + 1 < saConnectedVertices.length; i++) {
 
-                        if (!saConnectedVertices[i] || !saConnectedVertices[i + 1]) throw "Bad input: missing vetex.";
+                            if (!saConnectedVertices[i] || !saConnectedVertices[i + 1]) throw "Bad input: missing vetex.";
 
-                        edges.push([saConnectedVertices[i], saConnectedVertices[i + 1]])
+                            edges.push([saConnectedVertices[i], saConnectedVertices[i + 1]])
+                        }
                     }
 
                     if (edges.length) return { value: edges };
