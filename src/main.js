@@ -49,9 +49,9 @@ function displayInspectionResults() {
     let message = "The given graph is: <br>"
 
     if (currentGraphInstance.edgeDirection === currentGraphInstance.constructor.UNDIRECTED) {
-        message += `undirected, which also means cyclic, `;
+        message += `undirected, `;
     } else {
-        message += `directed, ${currentGraphInstance.isCyclic === false ? "not " : ""} cyclic,<br>`;
+        message += `directed, `;
     }
 
     if (currentGraphInstance.isConnected === false) {

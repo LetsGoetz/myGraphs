@@ -256,11 +256,7 @@ export default class Graph {
 
             } else if (graph.edgeDirection == Graph.DIRECTED) {
 
-                if (visited.get(graphNode) == iTraversalCount) {
-                    // the node was visited during this traversal -> is cyclic
-                    graph.isCyclic = true;
-
-                } else {
+                if (visited.get(graphNode) != iTraversalCount) {
                     // assert visited.get(graphNode) != iTraversalCount, which means the graph is connected to an other subset
                     isConnectedToOtherSubset = true;
                 }
@@ -270,7 +266,6 @@ export default class Graph {
         // set the graph properties
         if (graph.isConnected !== false) graph.isConnected = isConnectedToOtherSubset;
         if (coloration) graph.isBipartite = (graph.isBipartite !== false && graph.isConnected === true);
-        graph.isCyclic = graph.edgeDirection === Graph.UNDIRECTED || graph.isCyclic === true;
     }
 
 }
