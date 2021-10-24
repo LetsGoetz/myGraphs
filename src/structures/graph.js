@@ -213,7 +213,7 @@ export default class Graph {
         // if we need to check the coloration: set first node to red
         if (coloration) coloration.set(first.value, true);
 
-        while (!nodesToVisit.isEmpty()) {
+        while (nodesToVisit.isEmpty ? !nodesToVisit.isEmpty() : nodesToVisit.length) {
 
             let graphNode;
             

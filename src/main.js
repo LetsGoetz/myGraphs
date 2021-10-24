@@ -46,7 +46,7 @@ const processInput = async () => {
 
 function displayInspectionResults() {
     let messageDisplay = document.getElementById("messageDisplay");
-    let message = "The given graph is: <br>"
+    let message = "The given graph is: <br>";
 
     if (currentGraphInstance.edgeDirection === currentGraphInstance.constructor.UNDIRECTED) {
         message += `undirected, `;
