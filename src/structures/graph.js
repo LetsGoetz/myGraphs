@@ -268,6 +268,299 @@ export default class Graph {
         if (coloration) graph.isBipartite = (graph.isBipartite !== false && graph.isConnected === true);
     }
 
+    // union find----------------------------------START
+
+
+    findRepresentatives() {
+
+        let parents = {};
+        let ranks = {};
+        let representatives = new Set();
+
+
+        for (let vertexName in this.vertices) {
+            parents[vertexName] = vertexName;
+            ranks[vertexName] = 1;
+        }
+
+        
+
+        for (let vertexName in this.vertices) {
+
+            //find representative of the current set
+            let currentSetRepresentative = vertexName;
+            while (parents[currentSetRepresentative] != currentSetRepresentative) {
+                currentSetRepresentative = parents[currentSetRepresentative];
+            }
+
+            // now vertexName is the represent. name
+
+            for (let adjName in this.vertices[vertexName].edges) {
+
+                if (parents[adjName] == adjName) {
+                    //adjacent is a set on its own - consume it!
+
+                    parents[adjName] = currentSetRepresentative;
+                    ranks[currentSetRepresentative]++;
+                    ranks[adjName]--;
+
+                    representatives.add(currentSetRepresentative);
+
+                } else {
+                    // adj is a member of a set already
+
+                    let adjReprName = adjName;
+
+                    //find its representative
+                    while (parents[adjReprName] != adjReprName) {
+                        adjReprName = parents[adjReprName];
+                    }
+
+                    let winner, looser;
+
+                    if (adjReprName == currentSetRepresentative) {
+                        // adj && vertex have same root
+
+                        parents[adjName] = currentSetRepresentative;
+
+                    } else if (ranks[adjReprName] > ranks[currentSetRepresentative]) {
+
+                        winner = adjReprName;
+                        looser = currentSetRepresentative;
+
+                    } else {
+                        // assert ranks[adjReprName] <= ranks[vertexName] && adjReprName != vertexName
+                        winner = currentSetRepresentative;
+                        looser = adjReprName;
+                    }
+
+                    ranks[winner] = ranks[winner] + ranks[looser];
+                    ranks[looser] = 0;
+
+                    representatives.delete(looser);
+                    parents[looser] = winner;
+                }
+
+            }
+        }
+
+        return representatives;
+    }
+    // union find----------------------------------END
+
+    // detect cycles DFS ----------------------------START
+
+    isCyclic() {
+
+        let visited = new Set();
+        let currentPath = new Set();
+
+        for (let nodeName in this.vertices) {
+            if (this.iscyclicUtil(this.vertices[nodeName], visited, currentPath)) return true;
+        }
+
+        return false;
+    }
+
+    iscyclicUtil(vertex, visited, currentPath, predecessor = null) {
+
+        if (currentPath.has(vertex)) return true;
+
+        if (visited.has(vertex)) return false;
+
+        visited.add(vertex);
+        currentPath.add(vertex);
+
+        for (let adjName in vertex.edges) {
+            if (this.edgeDirection == Graph.UNDIRECTED && predecessor && vertex.edges[adjName].target == predecessor) continue;
+
+            if (this.iscyclicUtil(vertex.edges[adjName].target, visited, currentPath, vertex)) return true;
+        }
+
+        currentPath.delete(vertex);
+
+        return false;
+    }
+
+    // detect cycles DFS ----------------------------END
+
+    // find shortest path ----------------------------------START
+
+    findShortestPath(startNode, targetNode) {
+
+        let distances = this.calcualateDistances(startNode);
+        let pathStack = [];
+        let vertex = targetNode;
+
+        if (!distances.has(vertex)) return null;
+        pathStack.push(vertex);
+
+        do {
+            vertex = distances.get(vertex).pred;
+            pathStack.push(vertex);
+
+        } while (vertex != startNode);
+
+        return this.reverseArray(pathStack);
+    }
+
+    calcualateDistances(startNode) {
+
+        let distances = new Map();
+        let nodesToVisit = new Queue;
+
+        nodesToVisit.enqueue(startNode);
+        distances.set(startNode, { pred: null, distance: 0 });
+
+        while (!nodesToVisit.isEmpty()) {
+            let vertex = nodesToVisit.dequeue().value;
+
+            for (let adjName in vertex.edges) {
+                let adj = vertex.edges[adjName].target;
+
+                nodesToVisit.enqueue(adj);
+
+                let currentAdjDistance = distances.get(vertex).distance + vertex.edges[adjName].weight;
+
+                if (!distances.has(adj) || distances.get(adj) > currentAdjDistance) {
+                    distances.set(adj, { pred: vertex, distance: currentAdjDistance })
+                }
+            }
+        }
+
+        return distances;
+    }
+
+    // find shortest path ----------------------------------END
+
+    // find ANY path ----------------------------------START
+
+    findPath(startNode, targetNode) {
+
+        let visited = new Set();
+        let pathStack = [];
+
+        return this.reverseArray(this.findPathUtil(startNode, targetNode, visited, pathStack));
+    }
+
+    findPathUtil(vertex, targetNode, visited, pathStack) {
+
+        if (vertex == targetNode) {
+            pathStack.push(vertex);
+            return pathStack;
+        }
+
+        visited.add(vertex);
+
+        let result;
+
+        for (let adjName in vertex.edges) {
+            let adj = vertex.edges[adjName].target;
+
+            result = this.findPathUtil(adj, targetNode, visited, pathStack);
+
+            if (result) {
+                pathStack.push(vertex);
+                return pathStack;
+            }
+        }
+    }
+
+    // find ANY path ----------------------------------END
+    //find mother vertex ---------------------------START
+
+    findMotherVertex() {
+
+        if (this.edgeDirection == Graph.UNDIRECTED) return  "Any vertex is a mother vertex in an undirected graph."
+
+        let visited = new Set();
+
+        let lastRootNode;
+
+        let verticesCount = 0;
+        for (let nodeName in this.vertices) {
+            verticesCount++;
+
+            if (!visited.has(this.vertices[nodeName])) {
+                this.findMothervertexUtil(this.vertices[nodeName], visited);
+                lastRootNode = this.vertices[nodeName];
+            }
+        }
+
+        return this.checkMotherVertexIntegrity(lastRootNode, verticesCount) ? lastRootNode : "No mother vertex exists in this graph"
+    }
+
+    findMothervertexUtil(vertex, visited) {
+        visited.add(vertex);
+
+        for (let adjName in vertex.edges) {
+            if (!visited.has(vertex.edges[adjName].target)) {
+                this.findMothervertexUtil(vertex.edges[adjName].target, visited);
+            }
+        }
+    }
+
+    checkMotherVertexIntegrity(vertex, verticesCount) {
+
+        let visited = new Set();
+
+        this.findMothervertexUtil(vertex, visited);
+
+        return visited.size === verticesCount;
+    }
+    //find mother vertex ---------------------------END
+
+    // topologicSort ----------------------------START
+
+    topologicSort() {
+        if (this.edgeDirection == Graph.UNDIRECTED) throw "graph is undirected";
+
+        let visited = new Set();
+        let sortingStack = [];
+
+        for (let nodeName in this.vertices) {
+            if (!visited.has(this.vertices[nodeName])) {
+                this.topologicsortUtil(this.vertices[nodeName], visited, sortingStack);
+            }
+        }
+
+        return this.reverseArray(sortingStack);
+    }
+
+    topologicsortUtil(vertex, visited, sortingStack) {
+
+        visited.add(vertex);
+
+        for (let adjName in vertex.edges) {
+            let adjacent = vertex.edges[adjName].target;
+
+            if (!visited.has(adjacent)) {
+                this.topologicsortUtil(adjacent, visited, sortingStack);
+            }
+        }
+
+        sortingStack.push(vertex);
+    }
+
+    // topologicSort ----------------------------END
+
+    // helpers ----------------------------------
+    reverseArray(arr) {
+
+        if (!arr) return null;
+
+        let N = arr.length;
+
+        for (let i = 0; i < Math.floor(N / 2); i++) {
+            let tmp = arr[i];
+
+            arr[i] = arr[N - i - 1];
+            arr[N - i - 1] = tmp;
+        }
+
+        return arr;
+    }
+
 }
 
  
