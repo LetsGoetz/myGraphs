@@ -10,6 +10,36 @@ function onClickAction() {
     processInput();
 }
 
+function onClickTopo() {
+    if (!currentGraphInstance) throw "please create the graph first";
+    console.log("topologic sort", currentGraphInstance.topologicSort());
+}
+
+function onClickMother(){
+    if (!currentGraphInstance) throw "please create the graph first";
+    console.log("findMotherVertex: ", currentGraphInstance.findMotherVertex());
+}
+
+function onClickAnyPath() {
+    if (!currentGraphInstance) throw "please create the graph first";
+    console.log("find any path between 'a' and 'z': ", currentGraphInstance.findPath(currentGraphInstance.vertices["a"], currentGraphInstance.vertices["z"]));
+}
+
+function onClickShortestPath() {
+    if (!currentGraphInstance) throw "please create the graph first";
+    console.log("find shortest path between 'a' and 'z': ", currentGraphInstance.findShortestPath(currentGraphInstance.vertices["a"], currentGraphInstance.vertices["z"]));
+}
+
+function onClickIsCyclic() {
+    if (!currentGraphInstance) throw "please create the graph first";
+    console.log("Is this graph cyclic?: ", currentGraphInstance.isCyclic());
+}
+
+function onClickRepresentatives() {
+    if (!currentGraphInstance) throw "please create the graph first";
+    console.log("find representatives of connected subsets: ", currentGraphInstance.findRepresentatives());
+}
+
 const processInput = async () => {
     /*
      if there is any input, iterate over it and
@@ -20,7 +50,7 @@ const processInput = async () => {
     //create the graph (it does not inspect it)    
     if (rawString) {
         const Graph = await GraphConstructorPromise;
-        currentGraphInstance = new Graph(); // use Graph.DIRECTED as a constructor parameter if graph is directed
+        currentGraphInstance = new Graph(Graph.DIRECTED); // use Graph.DIRECTED as a constructor parameter if graph is directed
 
         for (let edges of inputIterator(rawString)) {
             edges.forEach(edge => {
